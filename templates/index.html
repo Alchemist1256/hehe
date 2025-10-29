@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Enguun — A Little Question from Shagai</title>
+  <style>
+    :root{
+      --bg: #fff0f6;
+      --pink: #ff66b2;
+      --dark: #330029;
+      --accent: #ffb3d9;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--bg),#ffeef8)}
+    .card{width:880px;max-width:95%;background:rgba(255,255,255,0.75);backdrop-filter:blur(6px);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,0.12);padding:36px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+    h1{color:var(--dark);margin:0 0 6px;font-size:28px}
+    p.lead{margin:0 0 18px;color:#6a2b4a}
+    .question{display:flex;gap:18px;align-items:center}
+    .btn{padding:14px 22px;border-radius:12px;border:0;font-weight:700;font-size:16px;cursor:pointer}
+    .btn-yes{background:linear-gradient(90deg,var(--pink),#ff4ea1);color:white;box-shadow:0 6px 18px rgba(255,102,178,0.22)}
+    .btn-no{background:#fff;border:2px solid #ffd7ec;color:var(--dark);position:relative}
+    .stage{height:320px;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    .message{font-size:28px;color:var(--pink);font-weight:bold;opacity:0;transition:opacity 0.5s;}
+    .show-message{opacity:1;}
+    .floaters{position:absolute;inset:0;pointer-events:none}
+    .floater{position:absolute;width:18px;height:18px;background:var(--accent);transform:rotate(45deg);border-radius:4px;opacity:0.9}
+    .no-wrap{position:relative}
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>💕</h1>
+    <p class="lead">Just answer honestly.</p>
+
+    <div class="stage">
+      <div>
+        <div class="question" id="question">
+          <div style="font-weight:700;font-size:20px;color:#4a1a2f">Nadtai uyrheh uu?</div>
+          <div style="flex:1"></div>
+          <div class="no-wrap">
+            <button class="btn btn-no" id="noBtn">No</button>
+            <button class="btn btn-yes" id="yesBtn">Yes</button>
+          </div>
+        </div>
+
+        <div style="height:28px"></div>
+
+        <div class="content-area" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+          <div class="message" id="message">Баяр хүргэе! 🎉</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="floaters" id="floaters"></div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const message = document.getElementById('message');
+    const card = document.getElementById('card');
+    const question = document.getElementById('question');
+    const floaters = document.getElementById('floaters');
+
+    function spawnFloaters(){
+      for(let i=0;i<22;i++){
+        const f=document.createElement('div');
+        f.className='floater';
+        const left=Math.random()*100;
+        const top=Math.random()*100;
+        const s=8+Math.random()*18;
+        f.style.left=left+'%';
+        f.style.top=top+'%';
+        f.style.width=s+'px';
+        f.style.height=s+'px';
+        f.style.opacity=0.6+Math.random()*0.4;
+        floaters.appendChild(f);
+        const dur=6+Math.random()*6;
+        f.animate([{transform:'translateY(0px) rotate(0deg)'},{transform:'translateY(-80px) rotate(90deg)'}],{duration:dur*1000,iterations:Infinity,delay:Math.random()*2000});
+      }
+    }
+    spawnFloaters();
+
+    noBtn.addEventListener('mouseenter', ()=>{
+      const rect = noBtn.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const maxX = cardRect.width - rect.width - 40;
+      const maxY = cardRect.height - rect.height - 40;
+      const x = Math.random()*maxX;
+      const y = Math.random()*maxY;
+      noBtn.style.position='relative';
+      noBtn.style.left=(x - (rect.left - cardRect.left))+'px';
+      noBtn.style.top=(y - (rect.top - cardRect.top))+'px';
+    });
+
+    yesBtn.addEventListener('click', ()=>{
+      question.style.display='none';
+      message.classList.add('show-message');
+
+      // Notify backend without any warnings
+      fetch('/notify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({response: 'Yes'})
+      });
+    });
+  </script>
+</body>
+</html>
