@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -8,12 +8,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# Model for counting Yes clicks
 class YesCounter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-@app.before_request
-def create_tables():
+# Create tables once at startup
+with app.app_context():
     db.create_all()
 
 @app.route('/')
@@ -22,7 +23,6 @@ def index():
 
 @app.route('/notify', methods=['POST'])
 def notify():
-    from flask import request
     data = request.get_json()
     if data and data.get('response') == 'Yes':
         new_entry = YesCounter()
