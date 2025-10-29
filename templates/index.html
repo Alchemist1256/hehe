@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>END DAR</title>
+  <title>Enguun — A Little Question from Shagai</title>
   <style>
     :root{
       --bg: #fff0f6;
@@ -22,7 +22,6 @@
     .stage{height:320px;display:flex;align-items:center;justify-content:center;flex-direction:column}
     .heart{width:200px;height:180px;position:relative;transform:scale(0);opacity:0}
     .heart:before,.heart:after{content:'';position:absolute;width:100px;height:160px;background:var(--pink);border-radius:100px 100px 0 0;top:0;left:50px;transform-origin:bottom left}
-    @keyframes pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:1}}
     .floaters{position:absolute;inset:0;pointer-events:none}
     .floater{position:absolute;width:18px;height:18px;background:var(--accent);transform:rotate(45deg);border-radius:4px;opacity:0.9}
     .no-wrap{position:relative}
@@ -47,7 +46,11 @@
         <div style="height:28px"></div>
 
         <div class="content-area" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-          <div class="heart" id="heart"><div class="heart-inner"></div></div>
+          <div class="heart" id="heart">
+            <div class="heart-inner" id="heartMessage" style="display:none; text-align:center; color:white; font-weight:bold; font-size:20px; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%)">
+              Bayar hurgye ❤️
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -59,6 +62,7 @@
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
     const heart = document.getElementById('heart');
+    const heartMessage = document.getElementById('heartMessage');
     const card = document.getElementById('card');
     const question = document.getElementById('question');
     const floaters = document.getElementById('floaters');
@@ -85,6 +89,7 @@
     yesBtn.addEventListener('click', () => {
       question.style.display = 'none';
       heart.style.transform = 'scale(1)';
+      heartMessage.style.display = 'block'; // show Bayar hurgye message
       heart.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}], {duration:800, iterations:4});
 
       // Send POST to Flask backend
