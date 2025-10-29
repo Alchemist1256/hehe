@@ -20,8 +20,8 @@
     .btn-yes{background:linear-gradient(90deg,var(--pink),#ff4ea1);color:white;box-shadow:0 6px 18px rgba(255,102,178,0.22)}
     .btn-no{background:#fff;border:2px solid #ffd7ec;color:var(--dark);position:relative}
     .stage{height:320px;display:flex;align-items:center;justify-content:center;flex-direction:column}
-    .heart{width:200px;height:180px;position:relative;transform:scale(0);opacity:0}
-    .heart:before,.heart:after{content:'';position:absolute;width:100px;height:160px;background:var(--pink);border-radius:100px 100px 0 0;top:0;left:50px;transform-origin:bottom left}
+    .message{font-size:28px;color:var(--pink);font-weight:bold;opacity:0;transition:opacity 0.5s;}
+    .show-message{opacity:1;}
     .floaters{position:absolute;inset:0;pointer-events:none}
     .floater{position:absolute;width:18px;height:18px;background:var(--accent);transform:rotate(45deg);border-radius:4px;opacity:0.9}
     .no-wrap{position:relative}
@@ -46,11 +46,7 @@
         <div style="height:28px"></div>
 
         <div class="content-area" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-          <div class="heart" id="heart">
-            <div class="heart-inner" id="heartMessage" style="display:none; text-align:center; color:white; font-weight:bold; font-size:20px; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%)">
-              Bayar hurgye ❤️
-            </div>
-          </div>
+          <div class="message" id="message">Bayrlalaa❤️ 🎉</div>
         </div>
       </div>
     </div>
@@ -61,46 +57,11 @@
   <script>
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
-    const heart = document.getElementById('heart');
-    const heartMessage = document.getElementById('heartMessage');
+    const message = document.getElementById('message');
     const card = document.getElementById('card');
     const question = document.getElementById('question');
     const floaters = document.getElementById('floaters');
 
-    // Detect touch devices
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    // Run-away No button only for non-touch devices
-    if (!isTouchDevice) {
-      noBtn.addEventListener('mouseenter', () => {
-        const rect = noBtn.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        const maxX = cardRect.width - rect.width - 40;
-        const maxY = cardRect.height - rect.height - 40;
-        const x = Math.random() * maxX;
-        const y = Math.random() * maxY;
-        noBtn.style.position='relative';
-        noBtn.style.left=(x - (rect.left - cardRect.left))+'px';
-        noBtn.style.top=(y - (rect.top - cardRect.top))+'px';
-      });
-    }
-
-    // Yes button click
-    yesBtn.addEventListener('click', () => {
-      question.style.display = 'none';
-      heart.style.transform = 'scale(1)';
-      heartMessage.style.display = 'block'; // show Bayar hurgye message
-      heart.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}], {duration:800, iterations:4});
-
-      // Send POST to Flask backend
-      fetch('/notify', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({response:'Yes'})
-      }).catch(console.warn);
-    });
-
-    // Floating particles
     function spawnFloaters(){
       for(let i=0;i<22;i++){
         const f=document.createElement('div');
@@ -119,6 +80,30 @@
       }
     }
     spawnFloaters();
+
+    noBtn.addEventListener('mouseenter', ()=>{
+      const rect = noBtn.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const maxX = cardRect.width - rect.width - 40;
+      const maxY = cardRect.height - rect.height - 40;
+      const x = Math.random()*maxX;
+      const y = Math.random()*maxY;
+      noBtn.style.position='relative';
+      noBtn.style.left=(x - (rect.left - cardRect.left))+'px';
+      noBtn.style.top=(y - (rect.top - cardRect.top))+'px';
+    });
+
+    yesBtn.addEventListener('click', ()=>{
+      question.style.display='none';
+      message.classList.add('show-message');
+
+      // Notify backend without any warnings
+      fetch('/notify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({response: 'Yes'})
+      });
+    });
   </script>
 </body>
 </html>
