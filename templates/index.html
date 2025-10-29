@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Enguun — A Little Question from Shagai</title>
+  <title>END DAR</title>
   <style>
     :root{
       --bg: #fff0f6;
@@ -20,8 +20,9 @@
     .btn-yes{background:linear-gradient(90deg,var(--pink),#ff4ea1);color:white;box-shadow:0 6px 18px rgba(255,102,178,0.22)}
     .btn-no{background:#fff;border:2px solid #ffd7ec;color:var(--dark);position:relative}
     .stage{height:320px;display:flex;align-items:center;justify-content:center;flex-direction:column}
-    .message{font-size:28px;color:var(--pink);font-weight:bold;opacity:0;transition:opacity 0.5s;}
-    .show-message{opacity:1;}
+    .heart{width:200px;height:180px;position:relative;transform:scale(0);opacity:0}
+    .heart:before,.heart:after{content:'';position:absolute;width:100px;height:160px;background:var(--pink);border-radius:100px 100px 0 0;top:0;left:50px;transform-origin:bottom left}
+    @keyframes pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:1}}
     .floaters{position:absolute;inset:0;pointer-events:none}
     .floater{position:absolute;width:18px;height:18px;background:var(--accent);transform:rotate(45deg);border-radius:4px;opacity:0.9}
     .no-wrap{position:relative}
@@ -46,7 +47,7 @@
         <div style="height:28px"></div>
 
         <div class="content-area" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-          <div class="message" id="message">Баяр хүргэе! 🎉</div>
+          <div class="heart" id="heart"><div class="heart-inner"></div></div>
         </div>
       </div>
     </div>
@@ -57,11 +58,44 @@
   <script>
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
-    const message = document.getElementById('message');
+    const heart = document.getElementById('heart');
     const card = document.getElementById('card');
     const question = document.getElementById('question');
     const floaters = document.getElementById('floaters');
 
+    // Detect touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // Run-away No button only for non-touch devices
+    if (!isTouchDevice) {
+      noBtn.addEventListener('mouseenter', () => {
+        const rect = noBtn.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        const maxX = cardRect.width - rect.width - 40;
+        const maxY = cardRect.height - rect.height - 40;
+        const x = Math.random() * maxX;
+        const y = Math.random() * maxY;
+        noBtn.style.position='relative';
+        noBtn.style.left=(x - (rect.left - cardRect.left))+'px';
+        noBtn.style.top=(y - (rect.top - cardRect.top))+'px';
+      });
+    }
+
+    // Yes button click
+    yesBtn.addEventListener('click', () => {
+      question.style.display = 'none';
+      heart.style.transform = 'scale(1)';
+      heart.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}], {duration:800, iterations:4});
+
+      // Send POST to Flask backend
+      fetch('/notify', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({response:'Yes'})
+      }).catch(console.warn);
+    });
+
+    // Floating particles
     function spawnFloaters(){
       for(let i=0;i<22;i++){
         const f=document.createElement('div');
@@ -80,30 +114,6 @@
       }
     }
     spawnFloaters();
-
-    noBtn.addEventListener('mouseenter', ()=>{
-      const rect = noBtn.getBoundingClientRect();
-      const cardRect = card.getBoundingClientRect();
-      const maxX = cardRect.width - rect.width - 40;
-      const maxY = cardRect.height - rect.height - 40;
-      const x = Math.random()*maxX;
-      const y = Math.random()*maxY;
-      noBtn.style.position='relative';
-      noBtn.style.left=(x - (rect.left - cardRect.left))+'px';
-      noBtn.style.top=(y - (rect.top - cardRect.top))+'px';
-    });
-
-    yesBtn.addEventListener('click', ()=>{
-      question.style.display='none';
-      message.classList.add('show-message');
-
-      // Notify backend without any warnings
-      fetch('/notify', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({response: 'Yes'})
-      });
-    });
   </script>
 </body>
 </html>
